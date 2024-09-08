@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Lista de candidatos com nome e matrícula (obtida da tabela anterior)
+# Lista de candidatos com nome e matrícula
 candidatos = [
     {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619"},
     {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326"},
@@ -68,7 +68,9 @@ def main():
     nota = st.number_input(f"Insira a nota de {candidato_selecionado}:", min_value=0.0, max_value=20.0, step=0.5)
 
     # Atualizar a nota do candidato
-    notas[matricula_selecionada] = nota
+    if st.button("Salvar Nota"):
+        notas[matricula_selecionada] = nota
+        st.success(f"Nota salva para {candidato_selecionado}!")
 
     # Botão para classificar candidatos
     if st.button("Classificar Candidatos"):
@@ -92,3 +94,4 @@ def main():
 # Executar o aplicativo
 if __name__ == "__main__":
     main()
+
