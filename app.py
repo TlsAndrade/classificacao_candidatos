@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # Lista de candidatos com nome e matrícula
 candidatos = [
@@ -50,6 +51,16 @@ def classificar_candidatos(candidatos):
 
     return aprovados, suplentes
 
+# Função para gerar DataFrame com notas
+def gerar_tabela_parcial(candidatos):
+    data = [{"Nome": c['Nome'], "Matrícula": c['Matrícula'], "Nota": notas[c['Matrícula']]} for c in candidatos]
+    df = pd.DataFrame(data)
+    return df
+
+# Função para verificar se todas as notas foram preenchidas
+def notas_preenchidas(notas):
+    return all(nota > 0 for nota in notas.values())
+
 # Função principal
 def main():
     st.set_page_config(page_title="Classificação de Candidatos", layout="wide")
@@ -72,26 +83,50 @@ def main():
         notas[matricula_selecionada] = nota
         st.success(f"Nota salva para {candidato_selecionado}!")
 
-    # Botão para classificar candidatos
-    if st.button("Classificar Candidatos"):
-        # Atribuir as notas aos candidatos
+        # Mostrar tabela parcial com as notas atuais
+        st.markdown("### Tabela Parcial de Notas")
+        df_parcial = gerar_tabela_parcial(candidatos)
+        st.dataframe(df_parcial)
+
+        # Mostrar classificação parcial
         for candidato in candidatos:
             candidato['Nota'] = notas[candidato['Matrícula']]
-
-        # Classificar candidatos
         aprovados, suplentes = classificar_candidatos(candidatos)
 
-        # Exibir aprovados
-        st.markdown("### Aprovados:")
+        st.markdown("### Classificação Parcial")
+        st.markdown("#### Aprovados:")
         for i, candidato in enumerate(aprovados, start=1):
             st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
 
-        # Exibir suplentes
-        st.markdown("### Suplentes:")
+        st.markdown("#### Suplentes:")
         for i, candidato in enumerate(suplentes, start=1):
             st.info(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+
+    # Botão para classificar candidatos (final)
+    if st.button("Classificar Candidatos"):
+        # Verificar se todas as notas foram preenchidas
+        if notas_preenchidas(notas):
+            # Atribuir as notas aos candidatos
+            for candidato in candidatos:
+                candidato['Nota'] = notas[candidato['Matrícula']]
+
+            # Classificar candidatos
+            aprovados, suplentes = classificar_candidatos(candidatos)
+
+            # Exibir aprovados
+            st.markdown("### Aprovados:")
+            for i, candidato in enumerate(aprovados, start=1):
+                st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+
+            # Exibir suplentes
+            st.markdown("### Suplentes:")
+            for i, candidato in enumerate(suplentes, start=1):
+                st.info(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        else:
+            st.error("Por favor, insira as notas para todos os candidatos antes de gerar a classificação final.")
 
 # Executar o aplicativo
 if __name__ == "__main__":
     main()
+
 
