@@ -32,34 +32,33 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377"}
 ]
 
-# Dicionário para armazenar as notas dos candidatos
+# Dicionário para armazenar as notas e status de ausência dos candidatos
 notas = {candidato['Matrícula']: 0 for candidato in candidatos}
+ausentes = {candidato['Matrícula']: False for candidato in candidatos}
 
 # Função para classificar os candidatos
 def classificar_candidatos(candidatos):
     # Filtrar candidatos com pelo menos 10 pontos
-    candidatos_classificados = [c for c in candidatos if c['Nota'] >= 10]
+    candidatos_classificados = [c for c in candidatos if c['Nota'] >= 10 and not ausentes[c['Matrícula']]]
+    ausentes_candidatos = [c for c in candidatos if ausentes[c['Matrícula']]]
 
     # Ordenar os candidatos classificados por nota (ordem decrescente)
     candidatos_classificados.sort(key=lambda x: x['Nota'], reverse=True)
 
-    # Selecionar os 18 primeiros aprovados
-    aprovados = candidatos_classificados[:18]
+    # Candidatos desclassificados por nota insuficiente
+    desclassificados = [c for c in candidatos if c['Nota'] < 10 and not ausentes[c['Matrícula']]]
 
-    # Selecionar os 5 suplentes
-    suplentes = candidatos_classificados[18:23]
-
-    return aprovados, suplentes
+    return candidatos_classificados, desclassificados, ausentes_candidatos
 
 # Função para gerar DataFrame com notas
 def gerar_tabela_parcial(candidatos):
-    data = [{"Nome": c['Nome'], "Matrícula": c['Matrícula'], "Nota": notas[c['Matrícula']]} for c in candidatos]
+    data = [{"Nome": c['Nome'], "Matrícula": c['Matrícula'], "Nota": notas[c['Matrícula']], "Ausente": ausentes[c['Matrícula']]} for c in candidatos]
     df = pd.DataFrame(data)
     return df
 
 # Função para verificar se todas as notas foram preenchidas
-def notas_preenchidas(notas):
-    return all(nota > 0 for nota in notas.values())
+def notas_preenchidas(notas, ausentes):
+    return all(nota > 0 or ausentes[matricula] for matricula, nota in notas.items())
 
 # Função principal
 def main():
@@ -75,12 +74,19 @@ def main():
     # Extrair a matrícula do candidato selecionado
     matricula_selecionada = candidato_selecionado.split("(Matrícula: ")[-1][:-1]
 
-    # Inserir a nota para o candidato selecionado
-    nota = st.number_input(f"Insira a nota de {candidato_selecionado}:", min_value=0.0, max_value=20.0, step=0.5)
+    # Checkbox para marcar ausência
+    ausente = st.checkbox(f"{candidato_selecionado} está ausente?", key=matricula_selecionada)
 
-    # Atualizar a nota do candidato
+    # Inserir a nota para o candidato selecionado (somente inteiros)
+    if ausente:
+        nota = 0  # Se o candidato estiver ausente, a nota é automaticamente 0
+    else:
+        nota = st.number_input(f"Insira a nota de {candidato_selecionado}:", min_value=0, max_value=20, step=1)
+
+    # Atualizar a nota e o status de ausência do candidato
     if st.button("Salvar Nota"):
         notas[matricula_selecionada] = nota
+        ausentes[matricula_selecionada] = ausente
         st.success(f"Nota salva para {candidato_selecionado}!")
 
         # Mostrar tabela parcial com as notas atuais
@@ -91,42 +97,47 @@ def main():
         # Mostrar classificação parcial
         for candidato in candidatos:
             candidato['Nota'] = notas[candidato['Matrícula']]
-        aprovados, suplentes = classificar_candidatos(candidatos)
+        classificados, desclassificados, ausentes_candidatos = classificar_candidatos(candidatos)
 
         st.markdown("### Classificação Parcial")
-        st.markdown("#### Aprovados:")
-        for i, candidato in enumerate(aprovados, start=1):
+        
+        st.markdown("#### Candidatos Classificados:")
+        for i, candidato in enumerate(classificados, start=1):
             st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
 
-        st.markdown("#### Suplentes:")
-        for i, candidato in enumerate(suplentes, start=1):
-            st.info(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        st.markdown("#### Candidatos Desclassificados:")
+        for candidato in desclassificados:
+            st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+
+        st.markdown("#### Candidatos Ausentes:")
+        for candidato in ausentes_candidatos:
+            st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
 
     # Botão para classificar candidatos (final)
     if st.button("Classificar Candidatos"):
         # Verificar se todas as notas foram preenchidas
-        if notas_preenchidas(notas):
+        if notas_preenchidas(notas, ausentes):
             # Atribuir as notas aos candidatos
             for candidato in candidatos:
                 candidato['Nota'] = notas[candidato['Matrícula']]
 
             # Classificar candidatos
-            aprovados, suplentes = classificar_candidatos(candidatos)
+            classificados, desclassificados, ausentes_candidatos = classificar_candidatos(candidatos)
 
-            # Exibir aprovados
-            st.markdown("### Aprovados:")
-            for i, candidato in enumerate(aprovados, start=1):
+            # Exibir classificados
+            st.markdown("### Classificação Final")
+            st.markdown("#### Candidatos Classificados:")
+            for i, candidato in enumerate(classificados, start=1):
                 st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
 
-            # Exibir suplentes
-            st.markdown("### Suplentes:")
-            for i, candidato in enumerate(suplentes, start=1):
-                st.info(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+            # Exibir desclassificados
+            st.markdown("#### Candidatos Desclassificados:")
+            for candidato in desclassificados:
+                st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+
+            # Exibir ausentes
+            st.markdown("#### Candidatos Ausentes:")
+            for candidato in ausentes_candidatos:
+                st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
         else:
-            st.error("Por favor, insira as notas para todos os candidatos antes de gerar a classificação final.")
-
-# Executar o aplicativo
-if __name__ == "__main__":
-    main()
-
-
+            st.error("Por favor, insira as notas para
