@@ -158,7 +158,7 @@ def exibir_tabela():
             df_sorted['Classificacao'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
 
             # Selecionar os 18 primeiros aprovados
-                        aprovados['Classificacao'] = aprovados.index + 1
+            aprovados['Classificacao'] = aprovados.index + 1
 
             # Selecionar os 5 próximos como suplentes
             suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
