@@ -38,7 +38,7 @@ candidatos = [
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF com largura ajustada para o nome e matrícula
+# Função para gerar o PDF com foco nas tabelas dos desqualificados e ausentes
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
@@ -48,15 +48,15 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf.cell(200, 10, 'Classificação de Candidatos', ln=True, align='C')
 
     # Função auxiliar para desenhar uma tabela no PDF
-    def desenhar_tabela(pdf, header, data):
+    def desenhar_tabela(pdf, header, data, nome_largura=80, matricula_largura=30):
         pdf.set_font('Arial', 'B', 8)
 
         # Cabeçalhos da tabela (centralizados)
         for col in header:
             if col == 'Nome':
-                pdf.cell(100, 10, col, 1, 0, 'C')  # Aumentar bastante a largura da célula do Nome
+                pdf.cell(nome_largura, 10, col, 1, 0, 'C')  # Aumentar a largura da célula do Nome
             elif col == 'Matrícula':
-                pdf.cell(30, 10, col, 1, 0, 'C')  # Diminuir bastante a largura da célula da Matrícula
+                pdf.cell(matricula_largura, 10, col, 1, 0, 'C')  # Diminuir a largura da célula da Matrícula
             else:
                 pdf.cell(35, 10, col, 1, 0, 'C')  # Outras colunas com tamanho padrão
         pdf.ln()
@@ -66,50 +66,36 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
         for row in data:
             for i, item in enumerate(row):
                 if i == 1:  # Nome - célula com largura maior
-                    pdf.cell(100, 10, str(item), 1, 0, 'C')
+                    pdf.cell(nome_largura, 10, str(item), 1, 0, 'C')
                 elif i == 2:  # Matrícula - célula com largura menor
-                    pdf.cell(30, 10, str(item), 1, 0, 'C')
+                    pdf.cell(matricula_largura, 10, str(item), 1, 0, 'C')
                 else:
                     pdf.cell(35, 10, str(item), 1, 0, 'C')
             pdf.ln()
 
     # Cabeçalhos da tabela
-    header = ['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']
-
-    # Tabela de Candidatos Aprovados
-    if not aprovados.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
-        data = aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
-        desenhar_tabela(pdf, header, data)
-
-    # Tabela de Candidatos Suplentes
-    if not suplentes.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
-        data = suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
-        desenhar_tabela(pdf, header, data)
+    header = ['Nome', 'Matrícula', 'Nota', 'Semestre']
 
     # Tabela de Candidatos Desqualificados
     if not desqualificados.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
         data = desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
-        desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Nota', 'Semestre'], data)
+        desenhar_tabela(pdf, header, data, nome_largura=120, matricula_largura=20)  # Aumentar muito o nome e diminuir muito a matrícula
 
     # Tabela de Candidatos Ausentes
     if not ausentes.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
         data = ausentes[['Nome', 'Matrícula', 'Semestre']].values.tolist()
-        desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Semestre'], data)
+        desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Semestre'], data, nome_largura=120, matricula_largura=20)
 
     # Tabela de Classificação Geral
     if not df_sorted.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Classificação Geral', ln=True, align='L')
         data = df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
-        desenhar_tabela(pdf, header, data)
+        desenhar_tabela(pdf, ['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre'], data)
 
     # Gerar PDF e salvar no diretório local
     pdf_output = 'classificacao_candidatos.pdf'
@@ -168,7 +154,7 @@ def exibir_tabela():
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
 
-                # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
         desqualificados = df[df['Nota'] < 10]
 
         # Filtrar e exibir candidatos ausentes
@@ -177,7 +163,7 @@ def exibir_tabela():
         # Salvar a classificação no estado
         salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted if not df_classificaveis.empty else pd.DataFrame())
 
-        # Exibir resultados
+                # Exibir resultados
         if not df_classificaveis.empty:
             st.write("### Candidatos Aprovados:")
             st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
