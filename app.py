@@ -92,6 +92,7 @@ def exibir_tabela():
 
     # Botão para exibir os dados atualizados
     if st.button('Classificar Candidatos'):
+
                 # Marcar nota zero para candidatos ausentes
         df.loc[df['Ausente'] == True, 'Nota'] = 0
 
@@ -139,3 +140,4 @@ def exibir_tabela():
 # Executar o aplicativo
 if __name__ == '__main__':
     exibir_tabela()
+
