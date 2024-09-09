@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 
-# Lista completa de 28 candidatos com nome, matrícula, nota, se estão ausentes e semestre
+# Lista completa de 28 candidatos com nome, matrícula, semestre
 candidatos = [
-    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": 0, "Ausente": False, "Semestre": 6},
-    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": 0, "Ausente": False, "Semestre": 5},
-    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": 0, "Ausente": False, "Semestre": 5},
-    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": 0, "Ausente": False, "Semestre": 6},
-    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": 0, "Ausente": False, "Semestre": 7},
-    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": 0, "Ausente": False, "Semestre": 6},
-    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": 0, "Ausente": False, "Semestre": 6},
-    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": 0, "Ausente": False, "Semestre": 4},
+    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": '', "Ausente": False, "Semestre": 7},
+    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": '', "Ausente": False, "Semestre": 4},
     {"Nome": "Gabriel Bertoncello", "Matrícula": "2021020656", "Nota": 0, "Ausente": False, "Semestre": 7},
     {"Nome": "Gabriel Marcon Mognon", "Matrícula": "2021010968", "Nota": 0, "Ausente": False, "Semestre": 8},
     {"Nome": "Giovan Bagolin Bonini", "Matrícula": "2022020298", "Nota": 0, "Ausente": False, "Semestre": 7},
@@ -85,7 +85,7 @@ def exibir_tabela():
         with col1:
             st.write(row['Nome'])
         with col2:
-                        # Campo de input sem o botão de mais/menos
+            # Campo de input vazio para digitar a nota
             df.at[index, 'Nota'] = st.text_input(f'Nota de {row["Nome"]}', value=row['Nota'], key=f'nota_{index}')
         with col3:
             df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
@@ -117,25 +117,25 @@ def exibir_tabela():
 
         # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes
         st.write("### Candidatos Aprovados:")
-        st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+        st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
         st.write("### Candidatos Suplentes:")
-        st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+        st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
         st.write("### Candidatos Desqualificados (Nota < 10):")
-        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
         st.write("### Candidatos Ausentes:")
-        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
+        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']], use_container_width=True)
 
         st.write("### Classificação Geral:")
-        df_sorted['Classificação'] = df_sorted.index + 1
-        st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+        df_sorted['Classificação'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
+        st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        # Botão para gerar PDF
+        # Botão para gerar PDF e download
         if st.button('Gerar PDF'):
             pdf_file = gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted)
-            st.success(f'PDF gerado com sucesso! [Clique aqui para baixar]({pdf_file})')
+            st.download_button('Baixar PDF', data=open(pdf_file, 'rb').read(), file_name="classificacao_candidatos.pdf", mime="application/pdf")
 
 # Executar o aplicativo
 if __name__ == '__main__':
