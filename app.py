@@ -35,17 +35,36 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": '', "Ausente": False, "Semestre": 5}
 ]
 
+import streamlit as st
+import pandas as pd
+from fpdf import FPDF
+import os
+
+# Definir lista de candidatos com nome, matrícula e semestre
+candidatos = [
+    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": '', "Ausente": False, "Semestre": 7},
+    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": '', "Ausente": False, "Semestre": 4},
+    # Adicione mais candidatos aqui...
+]
+
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF com largura ajustada para o nome e matrícula
+# Função para gerar o PDF ajustado para uma página A4
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
-    pdf = FPDF()
+    pdf = FPDF(orientation='P', unit='mm', format='A4')
+    pdf.set_auto_page_break(auto=True, margin=15)  # Habilitar quebra de página automática com margens ajustadas
     pdf.add_page()
 
-    # Definir o tamanho da fonte
-    pdf.set_font('Arial', 'B', 14)
-    pdf.cell(200, 10, 'Classificação de Candidatos', ln=True, align='C')
+    # Definir tamanho da fonte e título
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(0, 10, 'Classificação de Candidatos', ln=True, align='C')
 
     # Função auxiliar para desenhar uma tabela no PDF
     def desenhar_tabela(pdf, header, data):
@@ -54,11 +73,11 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
         # Cabeçalhos da tabela (centralizados)
         for col in header:
             if col == 'Nome':
-                pdf.cell(100, 10, col, 1, 0, 'C')  # Aumentar bastante a largura da célula do Nome
+                pdf.cell(85, 8, col, 1, 0, 'C')  # Largura ajustada da célula do Nome
             elif col == 'Matrícula':
-                pdf.cell(30, 10, col, 1, 0, 'C')  # Diminuir bastante a largura da célula da Matrícula
+                pdf.cell(30, 8, col, 1, 0, 'C')  # Largura ajustada da célula da Matrícula
             else:
-                pdf.cell(35, 10, col, 1, 0, 'C')  # Outras colunas com tamanho padrão
+                pdf.cell(25, 8, col, 1, 0, 'C')  # Outras colunas com tamanho ajustado
         pdf.ln()
 
         # Linhas da tabela (centralizadas)
@@ -66,11 +85,11 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
         for row in data:
             for i, item in enumerate(row):
                 if i == 1:  # Nome - célula com largura maior
-                    pdf.cell(100, 10, str(item), 1, 0, 'C')
+                    pdf.cell(85, 8, str(item), 1, 0, 'C')
                 elif i == 2:  # Matrícula - célula com largura menor
-                    pdf.cell(30, 10, str(item), 1, 0, 'C')
+                    pdf.cell(30, 8, str(item), 1, 0, 'C')
                 else:
-                    pdf.cell(35, 10, str(item), 1, 0, 'C')
+                    pdf.cell(25, 8, str(item), 1, 0, 'C')
             pdf.ln()
 
     # Cabeçalhos da tabela
@@ -78,36 +97,36 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
 
     # Tabela de Candidatos Aprovados
     if not aprovados.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 10, 'Candidatos Aprovados', ln=True, align='L')
         data = aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
         desenhar_tabela(pdf, header, data)
 
     # Tabela de Candidatos Suplentes
     if not suplentes.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 10, 'Candidatos Suplentes', ln=True, align='L')
         data = suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
         desenhar_tabela(pdf, header, data)
 
     # Tabela de Candidatos Desqualificados
     if not desqualificados.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
         data = desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
         desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Nota', 'Semestre'], data)
 
     # Tabela de Candidatos Ausentes
     if not ausentes.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 10, 'Candidatos Ausentes', ln=True, align='L')
         data = ausentes[['Nome', 'Matrícula', 'Semestre']].values.tolist()
         desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Semestre'], data)
 
     # Tabela de Classificação Geral
     if not df_sorted.empty:
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(200, 10, 'Classificação Geral', ln=True, align='L')
+        pdf.set_font('Arial', 'B', 10)
+        pdf.cell(0, 10, 'Classificação Geral', ln=True, align='L')
         data = df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
         desenhar_tabela(pdf, header, data)
 
@@ -157,8 +176,7 @@ def exibir_tabela():
             df_sorted['Classificacao'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
 
             # Selecionar os 18 primeiros aprovados
-            aprovados = df_sorted.head(18).reset_index(drop=True)
-            aprovados['Classificacao'] = aprovados.index + 1
+                        aprovados['Classificacao'] = aprovados.index + 1
 
             # Selecionar os 5 próximos como suplentes
             suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
@@ -168,7 +186,7 @@ def exibir_tabela():
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
 
-               # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
         desqualificados = df[df['Nota'] < 10]
 
         # Filtrar e exibir candidatos ausentes
@@ -227,6 +245,7 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
 
 
