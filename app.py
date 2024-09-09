@@ -34,7 +34,10 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": '', "Ausente": False, "Semestre": 5}
 ]
 
-# Função para gerar PDF
+# Criar DataFrame com os dados dos candidatos
+df = pd.DataFrame(candidatos)
+
+# Função para gerar o PDF
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
@@ -84,7 +87,7 @@ def salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sor
 def exibir_tabela():
     st.title('Classificação de Candidatos')
 
-    # Criar colunas para edição de nota e checkbox de "Ausente"
+    # Iterar sobre o DataFrame de candidatos
     for index, row in df.iterrows():
         col1, col2, col3 = st.columns([3, 1, 1])
         with col1:
@@ -152,18 +155,7 @@ def exibir_tabela():
             pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
             st.session_state['pdf_file'] = pdf_file
 
-        # Mostrar o botão de download somente se o PDF já foi gerado
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            gerar = st.button('Gerar PDF', key="gerar_pdf")
-
-        # Após gerar o PDF, salvar no estado
-        if gerar:
-            pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
-            st.session_state['pdf_file'] = pdf_file
-
-        # Colocar o botão de download corretamente dentro da verificação do PDF gerado
-        with col2:
+               with col2:
             # Mostrar o botão de download somente se o PDF já foi gerado
             if 'pdf_file' in st.session_state and st.session_state['pdf_file']:
                 with open(st.session_state['pdf_file'], 'rb') as f:
@@ -182,5 +174,6 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
 
