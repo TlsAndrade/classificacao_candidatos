@@ -20,7 +20,7 @@ candidatos = [
     {"Nome": "João Pedro Pereira Pinto Portella", "Matrícula": "2022020309", "Nota": 0, "Ausente": False, "Semestre": 5},
     {"Nome": "Júlia Dall Agnol", "Matrícula": "2024020412", "Nota": 0, "Ausente": False, "Semestre": 4},
     {"Nome": "Liege Dai-Prá Tasqueto", "Matrícula": "2020021248", "Nota": 0, "Ausente": False, "Semestre": 9},
-    {"Nome": "Luccas Do Amaral Gressler", "Matrícula": "2022020195", "Nota": 0, "Ausente": False, "Semestre": 5},
+    {"Nome": "Lucas Do Amaral Gressler", "Matrícula": "2022020195", "Nota": 0, "Ausente": False, "Semestre": 5},
     {"Nome": "Lucca Henrique Moura da Silva", "Matrícula": "2022010625", "Nota": 0, "Ausente": False, "Semestre": 6},
     {"Nome": "Luiz Otavio Wegher Floss", "Matrícula": "2022020316", "Nota": 0, "Ausente": False, "Semestre": 5},
     {"Nome": "Manar Aiman Dib Khaled", "Matrícula": "2024011525", "Nota": 0, "Ausente": False, "Semestre": 7},
@@ -85,15 +85,14 @@ def exibir_tabela():
         with col1:
             st.write(row['Nome'])
         with col2:
-            # Campo de input sem o botão de mais/menos
+                        # Campo de input sem o botão de mais/menos
             df.at[index, 'Nota'] = st.text_input(f'Nota de {row["Nome"]}', value=row['Nota'], key=f'nota_{index}')
         with col3:
             df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
 
     # Botão para exibir os dados atualizados
     if st.button('Classificar Candidatos'):
-
-                # Marcar nota zero para candidatos ausentes
+        # Marcar nota zero para candidatos ausentes
         df.loc[df['Ausente'] == True, 'Nota'] = 0
 
         # Garantir que o valor da nota seja convertido para inteiro
@@ -130,7 +129,8 @@ def exibir_tabela():
         st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
 
         st.write("### Classificação Geral:")
-        st.dataframe(df_sorted[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+        df_sorted['Classificação'] = df_sorted.index + 1
+        st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
 
         # Botão para gerar PDF
         if st.button('Gerar PDF'):
@@ -140,4 +140,3 @@ def exibir_tabela():
 # Executar o aplicativo
 if __name__ == '__main__':
     exibir_tabela()
-
