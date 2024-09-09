@@ -153,6 +153,17 @@ def exibir_tabela():
             st.session_state['pdf_file'] = pdf_file
 
                 with col2:
+                   # Mostrar o botão de download somente se o PDF já foi gerado
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            gerar = st.button('Gerar PDF', key="gerar_pdf")
+
+        # Após gerar o PDF, salvar no estado
+        if gerar:
+            pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
+            st.session_state['pdf_file'] = pdf_file
+
+        with col2:
             # Mostrar o botão de download somente se o PDF já foi gerado
             if 'pdf_file' in st.session_state:
                 with open(st.session_state['pdf_file'], 'rb') as f:
@@ -171,5 +182,4 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
-
 
