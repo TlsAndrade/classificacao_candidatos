@@ -195,6 +195,10 @@ if __name__ == '__main__':
         st.session_state['aprovados'] = pd.DataFrame()
         st.session_state['suplentes'] = pd.DataFrame()
         st.session_state['desqualificados'] = pd.DataFrame()
-        st
+        st.session_state['ausentes'] = pd.DataFrame()
+        st.session_state['df_sorted'] = pd.DataFrame()
+        st.session_state['pdf_file'] = None
+
+    exibir_tabela()
 
 
