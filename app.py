@@ -34,24 +34,6 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": '', "Ausente": False, "Semestre": 5}
 ]
 
-import streamlit as st
-import pandas as pd
-from fpdf import FPDF
-import os
-
-# Definir lista de candidatos com nome, matrícula e semestre
-candidatos = [
-    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": '', "Ausente": False, "Semestre": 6},
-    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": '', "Ausente": False, "Semestre": 5},
-    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": '', "Ausente": False, "Semestre": 5},
-    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": '', "Ausente": False, "Semestre": 6},
-    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": '', "Ausente": False, "Semestre": 7},
-    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": '', "Ausente": False, "Semestre": 6},
-    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": '', "Ausente": False, "Semestre": 6},
-    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": '', "Ausente": False, "Semestre": 4},
-    # Adicione mais candidatos aqui...
-]
-
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
@@ -162,9 +144,9 @@ def exibir_tabela():
         st.write("### Classificação Geral:")
         st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-    # Botões lado a lado para gerar e baixar PDF
-    if 'aprovados' in st.session_state:
+               # Mostrar o botão de download somente se o PDF já foi gerado
         col1, col2 = st.columns([1, 1])
+
         with col1:
             gerar = st.button('Gerar PDF', key="gerar_pdf")
 
@@ -173,8 +155,8 @@ def exibir_tabela():
             pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
             st.session_state['pdf_file'] = pdf_file
 
-               with col2:
-            # Mostrar o botão de download somente se o PDF já foi gerado
+        # Exibir o botão de download se o PDF já tiver sido gerado
+        with col2:
             if 'pdf_file' in st.session_state and st.session_state['pdf_file']:
                 with open(st.session_state['pdf_file'], 'rb') as f:
                     st.download_button('Baixar PDF', f, file_name="classificacao_candidatos.pdf", mime="application/pdf")
@@ -192,6 +174,7 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
 
 
