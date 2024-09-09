@@ -102,12 +102,18 @@ def main():
         st.markdown("### Classificação Parcial")
         
         st.markdown("#### Candidatos Classificados:")
-        for i, candidato in enumerate(classificados, start=1):
-            st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        if classificados:
+            for i, candidato in enumerate(classificados, start=1):
+                st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        else:
+            st.info("Nenhum candidato classificado até o momento.")
 
         st.markdown("#### Candidatos Desclassificados:")
-        for candidato in desclassificados:
-            st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        if desclassificados:
+            for candidato in desclassificados:
+                st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+        else:
+            st.info("Nenhum candidato desclassificado até o momento.")
 
         st.markdown("#### Candidatos Ausentes:")
         if ausentes_candidatos:
@@ -130,20 +136,16 @@ def main():
             # Exibir classificados
             st.markdown("### Classificação Final")
             st.markdown("#### Candidatos Classificados:")
-            for i, candidato in enumerate(classificados, start=1):
-                st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+            if classificados:
+                for i, candidato in enumerate(classificados, start=1):
+                    st.success(f"{i}. {candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
+            else:
+                st.info("Nenhum candidato classificado.")
 
             # Exibir desclassificados
             st.markdown("#### Candidatos Desclassificados:")
-            for candidato in desclassificados:
-                st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
-
-            # Exibir ausentes
-            st.markdown("#### Candidatos Ausentes:")
-            if ausentes_candidatos:
-                for candidato in ausentes_candidatos:
-                    st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
+            if desclassificados:
+                for candidato in desclassificados:
+                    st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
             else:
-                st.info("Nenhum candidato ausente.")
-        else:
-            st.error("Por favor, insira as notas para todos os candidatos antes
+               
