@@ -38,7 +38,7 @@ ausentes = {candidato['Matrícula']: False for candidato in candidatos}
 
 # Função para classificar os candidatos
 def classificar_candidatos(candidatos):
-    # Filtrar candidatos com pelo menos 10 pontos
+    # Filtrar candidatos com pelo menos 10 pontos e que não estão ausentes
     candidatos_classificados = [c for c in candidatos if c['Nota'] >= 10 and not ausentes[c['Matrícula']]]
     ausentes_candidatos = [c for c in candidatos if ausentes[c['Matrícula']]]
 
@@ -110,8 +110,11 @@ def main():
             st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
 
         st.markdown("#### Candidatos Ausentes:")
-        for candidato in ausentes_candidatos:
-            st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
+        if ausentes_candidatos:
+            for candidato in ausentes_candidatos:
+                st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
+        else:
+            st.info("Nenhum candidato ausente até o momento.")
 
     # Botão para classificar candidatos (final)
     if st.button("Classificar Candidatos"):
@@ -137,7 +140,10 @@ def main():
 
             # Exibir ausentes
             st.markdown("#### Candidatos Ausentes:")
-            for candidato in ausentes_candidatos:
-                st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
+            if ausentes_candidatos:
+                for candidato in ausentes_candidatos:
+                    st.error(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']}")
+            else:
+                st.info("Nenhum candidato ausente.")
         else:
-            st.error("Por favor, insira as notas para
+            st
