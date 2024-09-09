@@ -72,8 +72,13 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf.output(pdf_output)
     return pdf_output
 
-# Criar DataFrame
-df = pd.DataFrame(candidatos)
+# Função para salvar o estado da classificação
+def salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted):
+    st.session_state['aprovados'] = aprovados
+    st.session_state['suplentes'] = suplentes
+    st.session_state['desqualificados'] = desqualificados
+    st.session_state['ausentes'] = ausentes
+    st.session_state['df_sorted'] = df_sorted
 
 # Função para exibir o aplicativo
 def exibir_tabela():
@@ -117,6 +122,9 @@ def exibir_tabela():
         # Filtrar e exibir candidatos ausentes
         ausentes = df[df['Ausente'] == True]
 
+        # Salvar a classificação no estado
+        salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted)
+
         # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes sem índice
         st.write("### Candidatos Aprovados:")
         st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
@@ -133,23 +141,35 @@ def exibir_tabela():
         st.write("### Classificação Geral:")
         st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        # Botões lado a lado para gerar e baixar PDF
+    # Botões lado a lado para gerar e baixar PDF
+    if 'aprovados' in st.session_state:
         col1, col2 = st.columns([1, 1])
         with col1:
             gerar = st.button('Gerar PDF', key="gerar_pdf")
 
         # Após gerar o PDF, salvar no estado
         if gerar:
-            pdf_file = gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted)
+            pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
             st.session_state['pdf_file'] = pdf_file
 
-        with col2:
+                with col2:
             # Mostrar o botão de download somente se o PDF já foi gerado
             if 'pdf_file' in st.session_state:
                 with open(st.session_state['pdf_file'], 'rb') as f:
                     st.download_button('Baixar PDF', f, file_name="classificacao_candidatos.pdf", mime="application/pdf")
 
+
 # Executar o aplicativo
 if __name__ == '__main__':
+    # Certifique-se de inicializar a variável de estado
+    if 'aprovados' not in st.session_state:
+        st.session_state['aprovados'] = []
+        st.session_state['suplentes'] = []
+        st.session_state['desqualificados'] = []
+        st.session_state['ausentes'] = []
+        st.session_state['df_sorted'] = []
+        st.session_state['pdf_file'] = None
+
     exibir_tabela()
+
 
