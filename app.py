@@ -51,9 +51,25 @@ def exibir_tabela():
             df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
 
     # Botão para exibir os dados atualizados
-    if st.button('Exibir Dados Atualizados'):
-        st.write("Dados Atualizados:")
-        st.dataframe(df)
+    if st.button('Classificar Candidatos'):
+        # Marcar nota zero para candidatos ausentes
+        df.loc[df['Ausente'] == True, 'Nota'] = 0
+
+        # Classificar candidatos em ordem decrescente
+        df_sorted = df.sort_values(by='Nota', ascending=False)
+
+        # Selecionar os 18 primeiros aprovados
+        aprovados = df_sorted.head(18)
+
+        # Selecionar os 5 próximos como suplentes
+        suplentes = df_sorted.iloc[18:23]
+
+        # Exibir os candidatos aprovados e suplentes
+        st.write("### Candidatos Aprovados:")
+        st.dataframe(aprovados[['Nome', 'Matrícula', 'Nota']])
+
+        st.write("### Candidatos Suplentes:")
+        st.dataframe(suplentes[['Nome', 'Matrícula', 'Nota']])
 
 # Executar o aplicativo
 if __name__ == '__main__':
