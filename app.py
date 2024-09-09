@@ -146,4 +146,4 @@ def main():
             else:
                 st.info("Nenhum candidato ausente.")
         else:
-            st
+            st.error("Por favor, insira as notas para todos os candidatos antes
