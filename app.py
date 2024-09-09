@@ -41,7 +41,7 @@ df = pd.DataFrame(candidatos)
 # Função para gerar o PDF ajustado para uma página A4
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF(orientation='P', unit='mm', format='A4')
-    pdf.set_auto_page_break(auto=True, margin=15)  # Habilitar quebra de página automática com margens ajustadas
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
     # Definir tamanho da fonte e título
@@ -55,11 +55,11 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
         # Cabeçalhos da tabela (centralizados)
         for col in header:
             if col == 'Nome':
-                pdf.cell(85, 8, col, 1, 0, 'C')  # Largura ajustada da célula do Nome
+                pdf.cell(85, 8, col, 1, 0, 'C')
             elif col == 'Matrícula':
-                pdf.cell(30, 8, col, 1, 0, 'C')  # Largura ajustada da célula da Matrícula
+                pdf.cell(30, 8, col, 1, 0, 'C')
             else:
-                pdf.cell(25, 8, col, 1, 0, 'C')  # Outras colunas com tamanho ajustado
+                pdf.cell(25, 8, col, 1, 0, 'C')
         pdf.ln()
 
         # Linhas da tabela (centralizadas)
@@ -154,17 +154,23 @@ def exibir_tabela():
         # Classificar candidatos com nota >= 10 em ordem decrescente de notas e em caso de empate, por semestre
         if not df_classificaveis.empty:
             df_sorted = df_classificaveis.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
-            df_sorted = df_sorted.reset_index(drop=True)  # Resetar o índice
-            df_sorted['Classificacao'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
+            df_sorted = df_sorted.reset_index(drop=True)
+
+            # Garantir que o DataFrame `aprovados` não esteja vazio antes de criar a coluna 'Classificacao'
+            if not df_sorted.empty:
+                df_sorted['Classificacao'] = df_sorted.index + 1
 
             # Selecionar os 18 primeiros aprovados
-            aprovados['Classificacao'] = aprovados.index + 1
+            aprovados = df_sorted.head(18).reset_index(drop=True)
+            if not aprovados.empty:
+                aprovados['Classificacao'] = aprovados.index + 1
 
             # Selecionar os 5 próximos como suplentes
             suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
-            suplentes['Classificacao'] = suplentes.index + 19
+            if not suplentes.empty:
+                suplentes['Classificacao'] = suplentes.index + 19
 
-        else:
+                else:
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
 
@@ -227,6 +233,7 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
 
 
