@@ -1,8 +1,5 @@
-import panel as pn
+import streamlit as st
 import pandas as pd
-
-# Iniciar a extensão do Panel com suporte ao Tabulator
-pn.extension('tabulator')
 
 # Lista de 28 candidatos com nome, matrícula, nota e se estão ausentes
 candidatos = [
@@ -39,31 +36,25 @@ candidatos = [
 # Criar DataFrame
 df = pd.DataFrame(candidatos)
 
-# Criar um widget Tabulator interativo
-dataframe_widget = pn.widgets.Tabulator(df, show_index=False)
+# Função para exibir o aplicativo
+def exibir_tabela():
+    st.title('Classificação de Candidatos')
 
-# Função para atualizar os dados
-def update_data(event):
-    updated_df = dataframe_widget.value
-    print(updated_df)  # Aqui você pode processar ou salvar os dados atualizados
-    return updated_df  # Retorna os dados para o painel de saída
+    # Criar colunas para edição de nota e checkbox de "Ausente"
+    for index, row in df.iterrows():
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col1:
+            st.write(row['Nome'])
+        with col2:
+            df.at[index, 'Nota'] = st.number_input(f'Nota de {row["Nome"]}', min_value=0, max_value=20, value=row['Nota'], key=f'nota_{index}')
+        with col3:
+            df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
 
-# Botão para atualizar os dados
-update_button = pn.widgets.Button(name='Atualizar Dados', button_type='primary')
-update_button.on_click(update_data)
+    # Botão para exibir os dados atualizados
+    if st.button('Exibir Dados Atualizados'):
+        st.write("Dados Atualizados:")
+        st.dataframe(df)
 
-# Exibir os dados atualizados após o clique no botão
-output = pn.pane.DataFrame(df, width=400)
-
-# Função que organiza o layout
-def meu_app():
-    return pn.Column("### Classificação de Candidatos",
-                     dataframe_widget,
-                     update_button,
-                     output)
-
-# Inicializar o aplicativo Panel
-app = meu_app()
-
-# Rodar o Panel no Binder
-pn.serve(app, port=5006, address='0.0.0.0', show=False)
+# Executar o aplicativo
+if __name__ == '__main__':
+    exibir_tabela()
