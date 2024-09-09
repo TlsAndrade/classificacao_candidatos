@@ -85,8 +85,8 @@ def exibir_tabela():
         with col1:
             st.write(row['Nome'])
         with col2:
-            # Campo de input vazio para digitar a nota
-            df.at[index, 'Nota'] = st.text_input(f'Nota de {row["Nome"]}', value=row['Nota'], key=f'nota_{index}')
+            # Limitar a entrada para valores inteiros entre 0 e 20
+            df.at[index, 'Nota'] = st.number_input(f'Nota de {row["Nome"]}', min_value=0, max_value=20, value=0, step=1, key=f'nota_{index}')
         with col3:
             df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
 
@@ -136,14 +136,17 @@ def exibir_tabela():
         # Botões lado a lado para gerar e baixar PDF
         col1, col2 = st.columns([1, 1])
         with col1:
-            gerar = st.button('Gerar PDF')
+            gerar = st.button('Gerar PDF', key="gerar_pdf")
 
+        # Após gerar o PDF, salvar no estado
         if gerar:
             pdf_file = gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted)
+            st.session_state['pdf_file'] = pdf_file
 
         with col2:
-            if 'pdf_file' in locals():
-                with open(pdf_file, 'rb') as f:
+            # Mostrar o botão de download somente se o PDF já foi gerado
+            if 'pdf_file' in st.session_state:
+                with open(st.session_state['pdf_file'], 'rb') as f:
                     st.download_button('Baixar PDF', f, file_name="classificacao_candidatos.pdf", mime="application/pdf")
 
 # Executar o aplicativo
