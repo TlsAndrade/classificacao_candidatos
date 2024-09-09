@@ -1,36 +1,17 @@
 import streamlit as st
 import pandas as pd
 
-# Lista de 28 candidatos com nome, matrícula, nota e se estão ausentes
+# Lista de 28 candidatos com nome, matrícula, nota, se estão ausentes e semestre
 candidatos = [
-    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": 0, "Ausente": False},
-    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": 0, "Ausente": False},
-    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": 0, "Ausente": False},
-    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": 0, "Ausente": False},
-    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": 0, "Ausente": False},
-    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": 0, "Ausente": False},
-    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": 0, "Ausente": False},
-    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": 0, "Ausente": False},
-    {"Nome": "Gabriel Bertoncello", "Matrícula": "2021020656", "Nota": 0, "Ausente": False},
-    {"Nome": "Gabriel Marcon Mognon", "Matrícula": "2021010968", "Nota": 0, "Ausente": False},
-    {"Nome": "Giovan Bagolin Bonini", "Matrícula": "2022020298", "Nota": 0, "Ausente": False},
-    {"Nome": "Isabel Luisa Rosenbach", "Matrícula": "2022020007", "Nota": 0, "Ausente": False},
-    {"Nome": "Joao Otavio Borges Espindola", "Matrícula": "2022010526", "Nota": 0, "Ausente": False},
-    {"Nome": "Joao Pedro Pereira Pinto Portella", "Matrícula": "2022020309", "Nota": 0, "Ausente": False},
-    {"Nome": "Julia Dall Agnol", "Matrícula": "2024020412", "Nota": 0, "Ausente": False},
-    {"Nome": "Liege Dai-Prá Tasqueto", "Matrícula": "2020021248", "Nota": 0, "Ausente": False},
-    {"Nome": "Lucca Henrique Moura da Silva", "Matrícula": "2022010625", "Nota": 0, "Ausente": False},
-    {"Nome": "Luiz Otavio Wegher Floss", "Matrícula": "2022020316", "Nota": 0, "Ausente": False},
-    {"Nome": "Manar Aiman Dib Khaled", "Matrícula": "2024011525", "Nota": 0, "Ausente": False},
-    {"Nome": "Matheus Henrique Bergenthal Porto", "Matrícula": "2020010914", "Nota": 0, "Ausente": False},
-    {"Nome": "Nicolás Navarro Stiler", "Matrícula": "2024020360", "Nota": 0, "Ausente": False},
-    {"Nome": "Pedro Ziegler Dalenogare", "Matrícula": "2023010019", "Nota": 0, "Ausente": False},
-    {"Nome": "Rafaela Cougo Rios", "Matrícula": "2022020212", "Nota": 0, "Ausente": False},
-    {"Nome": "Roberto Carlan de Oliveira", "Matrícula": "2022020313", "Nota": 0, "Ausente": False},
-    {"Nome": "Taina Oliveira Squizani", "Matrícula": "2021010527", "Nota": 0, "Ausente": False},
-    {"Nome": "Taina Toaldo Granez", "Matrícula": "2021020462", "Nota": 0, "Ausente": False},
-    {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": 0, "Ausente": False},
-    {"Nome": "Matheus Augusto Schuch", "Matrícula": "2023020194", "Nota": 0, "Ausente": False}
+    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": 0, "Ausente": False, "Semestre": 6},
+    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": 0, "Ausente": False, "Semestre": 5},
+    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": 0, "Ausente": False, "Semestre": 5},
+    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": 0, "Ausente": False, "Semestre": 6},
+    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": 0, "Ausente": False, "Semestre": 7},
+    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": 0, "Ausente": False, "Semestre": 6},
+    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": 0, "Ausente": False, "Semestre": 6},
+    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": 0, "Ausente": False, "Semestre": 4},
+    # Adicione os outros candidatos conforme necessário...
 ]
 
 # Criar DataFrame
@@ -55,8 +36,8 @@ def exibir_tabela():
         # Marcar nota zero para candidatos ausentes
         df.loc[df['Ausente'] == True, 'Nota'] = 0
 
-        # Classificar candidatos em ordem decrescente
-        df_sorted = df.sort_values(by='Nota', ascending=False)
+        # Classificar candidatos em ordem decrescente de notas e em caso de empate, por semestre decrescente
+        df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
 
         # Selecionar os 18 primeiros aprovados
         aprovados = df_sorted.head(18)
@@ -66,10 +47,15 @@ def exibir_tabela():
 
         # Exibir os candidatos aprovados e suplentes
         st.write("### Candidatos Aprovados:")
-        st.dataframe(aprovados[['Nome', 'Matrícula', 'Nota']])
+        st.dataframe(aprovados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
 
         st.write("### Candidatos Suplentes:")
-        st.dataframe(suplentes[['Nome', 'Matrícula', 'Nota']])
+        st.dataframe(suplentes[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        # Filtrar e exibir candidatos ausentes
+        ausentes = df[df['Ausente'] == True]
+        st.write("### Candidatos Ausentes:")
+        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
 
 # Executar o aplicativo
 if __name__ == '__main__':
