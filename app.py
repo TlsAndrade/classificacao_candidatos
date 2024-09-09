@@ -35,10 +35,28 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": '', "Ausente": False, "Semestre": 5}
 ]
 
+import streamlit as st
+import pandas as pd
+from fpdf import FPDF
+import os
+
+# Definir lista de candidatos com nome, matrícula e semestre
+candidatos = [
+    {"Nome": "Alexandre Amorim Pivetta", "Matrícula": "2022010619", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Artur Ribeiro de Barcellos", "Matrícula": "2022020326", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Brenda Garcia Xavier", "Matrícula": "2022020301", "Nota": '', "Ausente": False, "Semestre": 5},
+    {"Nome": "Cirano Gautier dos Santos", "Matrícula": "2017012023", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Crissie Del'Olmo Soares Barbieri", "Matrícula": "2021020325", "Nota": '', "Ausente": False, "Semestre": 7},
+    {"Nome": "Daniel Muraro", "Matrícula": "2022010630", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Edgar Franchesco Fraga de Souza", "Matrícula": "2022010242", "Nota": '', "Ausente": False, "Semestre": 6},
+    {"Nome": "Eduardo Ferreira Stormovski", "Matrícula": "2023010008", "Nota": '', "Ausente": False, "Semestre": 4},
+    # Adicione mais candidatos aqui...
+]
+
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF com as mesmas tabelas exibidas no app, ajustando largura, fonte e removendo quebra de linha
+# Função para gerar o PDF com as mesmas tabelas exibidas no app, ajustando largura, fonte e alinhamento
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
@@ -53,15 +71,15 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
 
         # Cabeçalhos da tabela (centralizados)
         for col in header:
-            pdf.cell(70 if col == 'Nome' else 35, 10, col, 1, 0, 'C')
+            pdf.cell(80 if col == 'Nome' else 35, 10, col, 1, 0, 'C')  # Aumentar a largura da célula do Nome
         pdf.ln()
 
-        # Linhas da tabela (centralizadas e sem quebra de linha para o nome)
+        # Linhas da tabela (centralizadas)
         pdf.set_font('Arial', '', 8)
         for row in data:
             for i, item in enumerate(row):
-                if i == 1:  # Nome - largura maior, sem quebra de linha
-                    pdf.cell(70, 10, str(item), 1, 0, 'C')
+                if i == 1:  # Nome - célula com largura maior
+                    pdf.cell(80, 10, str(item), 1, 0, 'C')
                 else:
                     pdf.cell(35, 10, str(item), 1, 0, 'C')
             pdf.ln()
@@ -167,10 +185,10 @@ def exibir_tabela():
         # Filtrar e exibir candidatos ausentes
         ausentes = df[df['Ausente'] == True]
 
-        # Salvar a classificação no estado
+                # Salvar a classificação no estado
         salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted if not df_classificaveis.empty else pd.DataFrame())
 
-                # Exibir resultados
+        # Exibir resultados
         if not df_classificaveis.empty:
             st.write("### Candidatos Aprovados:")
             st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
@@ -220,3 +238,4 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
