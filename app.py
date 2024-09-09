@@ -92,5 +92,50 @@ def exibir_tabela():
 
     # Botão para exibir os dados atualizados
     if st.button('Classificar Candidatos'):
-        # Marcar nota zero para candidatos ausentes
-        df.loc[df['Ausente'] == True, 'Nota
+                # Marcar nota zero para candidatos ausentes
+        df.loc[df['Ausente'] == True, 'Nota'] = 0
+
+        # Garantir que o valor da nota seja convertido para inteiro
+        df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce').fillna(0).astype(int)
+
+        # Classificar candidatos em ordem decrescente de notas e em caso de empate, por semestre decrescente
+        df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
+
+        # Selecionar os 18 primeiros aprovados
+        aprovados = df_sorted.head(18).reset_index(drop=True)
+        aprovados['Classificação'] = aprovados.index + 1
+
+        # Selecionar os 5 próximos como suplentes
+        suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
+        suplentes['Classificação'] = suplentes.index + 19
+
+        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        desqualificados = df_sorted[df_sorted['Nota'] < 10]
+
+        # Filtrar e exibir candidatos ausentes
+        ausentes = df[df['Ausente'] == True]
+
+        # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes
+        st.write("### Candidatos Aprovados:")
+        st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        st.write("### Candidatos Suplentes:")
+        st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        st.write("### Candidatos Desqualificados (Nota < 10):")
+        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        st.write("### Candidatos Ausentes:")
+        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
+
+        st.write("### Classificação Geral:")
+        st.dataframe(df_sorted[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        # Botão para gerar PDF
+        if st.button('Gerar PDF'):
+            pdf_file = gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted)
+            st.success(f'PDF gerado com sucesso! [Clique aqui para baixar]({pdf_file})')
+
+# Executar o aplicativo
+if __name__ == '__main__':
+    exibir_tabela()
