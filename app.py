@@ -45,7 +45,7 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     # Tabela de Classificação Geral
     pdf.cell(200, 10, 'Classificação Geral de Todos os Candidatos', ln=True, align='L')
     for i, row in df_sorted.iterrows():
-        pdf.cell(200, 10, f'{i+1}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
 
     # Aprovados
     pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
@@ -100,6 +100,8 @@ def exibir_tabela():
 
         # Classificar candidatos em ordem decrescente de notas e em caso de empate, por semestre decrescente
         df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
+        df_sorted = df_sorted.reset_index(drop=True)  # Resetar o índice
+        df_sorted['Classificação'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
 
         # Selecionar os 18 primeiros aprovados
         aprovados = df_sorted.head(18).reset_index(drop=True)
@@ -115,7 +117,7 @@ def exibir_tabela():
         # Filtrar e exibir candidatos ausentes
         ausentes = df[df['Ausente'] == True]
 
-        # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes
+        # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes sem índice
         st.write("### Candidatos Aprovados:")
         st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
@@ -129,14 +131,22 @@ def exibir_tabela():
         st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']], use_container_width=True)
 
         st.write("### Classificação Geral:")
-        df_sorted['Classificação'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
         st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        # Botão para gerar PDF e download
-        if st.button('Gerar PDF'):
+        # Botões lado a lado para gerar e baixar PDF
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            gerar = st.button('Gerar PDF')
+
+        if gerar:
             pdf_file = gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted)
-            st.download_button('Baixar PDF', data=open(pdf_file, 'rb').read(), file_name="classificacao_candidatos.pdf", mime="application/pdf")
+
+        with col2:
+            if 'pdf_file' in locals():
+                with open(pdf_file, 'rb') as f:
+                    st.download_button('Baixar PDF', f, file_name="classificacao_candidatos.pdf", mime="application/pdf")
 
 # Executar o aplicativo
 if __name__ == '__main__':
     exibir_tabela()
+
