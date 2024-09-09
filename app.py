@@ -162,7 +162,7 @@ def exibir_tabela():
             gerar = st.button('Gerar PDF', key="gerar_pdf")
 
         # Após gerar o PDF, salvar no estado
-                if gerar and not st.session_state['aprovados'].empty:
+        if gerar and not st.session_state['aprovados'].empty:
             pdf_file = gerar_pdf(st.session_state['aprovados'], st.session_state['suplentes'], st.session_state['desqualificados'], st.session_state['ausentes'], st.session_state['df_sorted'])
             st.session_state['pdf_file'] = pdf_file
 
@@ -185,4 +185,5 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
