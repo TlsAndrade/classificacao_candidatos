@@ -148,7 +148,7 @@ def exibir_tabela():
         # Garantir que o valor da nota seja convertido para inteiro
         df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce').fillna(0).astype(int)
 
-        # Filtrar candidatos com nota >= 10 para serem classificados
+                # Filtrar candidatos com nota >= 10 para serem classificados
         df_classificaveis = df[df['Nota'] >= 10]
 
         # Classificar candidatos com nota >= 10 em ordem decrescente de notas e em caso de empate, por semestre
@@ -169,10 +169,10 @@ def exibir_tabela():
             suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
             if not suplentes.empty:
                 suplentes['Classificacao'] = suplentes.index + 19
-
-                else:
+        else:
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
+
 
         # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
         desqualificados = df[df['Nota'] < 10]
