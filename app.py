@@ -156,21 +156,23 @@ def exibir_tabela():
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
 
-               # Exibir os candidatos desqualificados
-        st.write("### Candidatos Desqualificados (Nota < 10):")
-        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
+        # Exibir os candidatos desqualificados (Nota < 10), se houver
+        if not desqualificados.empty:
+            st.write("### Candidatos Desqualificados (Nota < 10):")
+            st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        # Exibir os candidatos ausentes
-        st.write("### Candidatos Ausentes:")
-        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']], use_container_width=True)
+        # Exibir os candidatos ausentes, se houver
+        if not ausentes.empty:
+            st.write("### Candidatos Ausentes:")
+            st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']], use_container_width=True)
 
-        # Exibir a classificação geral
+        # Exibir a classificação geral, se houver candidatos classificados
         if not df_classificaveis.empty:
             st.write("### Classificação Geral:")
             st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-    # Botões lado a lado para gerar e baixar PDF
-    if 'aprovados' in st.session_state:
+        # Botões lado a lado para gerar e baixar PDF
+        if 'aprovados' in st.session_state:
         col1, col2 = st.columns([1, 1])
         with col1:
             gerar = st.button('Gerar PDF', key="gerar_pdf")
