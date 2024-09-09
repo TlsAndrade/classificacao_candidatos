@@ -148,4 +148,4 @@ def main():
                 for candidato in desclassificados:
                     st.warning(f"{candidato['Nome']} - Matrícula: {candidato['Matrícula']} - Nota: {candidato['Nota']}")
             else:
-               
+                st.info("Nenhum candidato desclassificado até o momento")
