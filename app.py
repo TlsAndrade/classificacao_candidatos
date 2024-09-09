@@ -38,7 +38,7 @@ candidatos = [
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF com as mesmas tabelas exibidas no app
+# Função para gerar o PDF com as mesmas tabelas exibidas no app, com linhas e colunas
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
@@ -46,45 +46,58 @@ def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf.set_font('Arial', 'B', 16)
     pdf.cell(200, 10, 'Classificação de Candidatos', ln=True, align='C')
 
+    # Função auxiliar para desenhar uma tabela no PDF
+    def desenhar_tabela(pdf, header, data):
+        pdf.set_font('Arial', 'B', 10)
+        # Cabeçalhos da tabela
+        for col in header:
+            pdf.cell(40, 10, col, 1)
+        pdf.ln()
+
+        # Linhas da tabela
+        pdf.set_font('Arial', '', 10)
+        for row in data:
+            for item in row:
+                pdf.cell(40, 10, str(item), 1)
+            pdf.ln()
+
+    # Cabeçalhos da tabela
+    header = ['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']
+
     # Tabela de Candidatos Aprovados
     if not aprovados.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
-        pdf.set_font('Arial', '', 10)
-        for i, row in aprovados.iterrows():
-            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+        data = aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
+        desenhar_tabela(pdf, header, data)
 
     # Tabela de Candidatos Suplentes
     if not suplentes.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
-        pdf.set_font('Arial', '', 10)
-        for i, row in suplentes.iterrows():
-            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+        data = suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
+        desenhar_tabela(pdf, header, data)
 
     # Tabela de Candidatos Desqualificados
     if not desqualificados.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
-        pdf.set_font('Arial', '', 10)
-        for i, row in desqualificados.iterrows():
-            pdf.cell(200, 10, f'{row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+        data = desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
+        desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Nota', 'Semestre'], data)
 
     # Tabela de Candidatos Ausentes
     if not ausentes.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
-        pdf.set_font('Arial', '', 10)
-        for i, row in ausentes.iterrows():
-            pdf.cell(200, 10, f'{row["Nome"]} - Semestre: {row["Semestre"]}', ln=True)
+        data = ausentes[['Nome', 'Matrícula', 'Semestre']].values.tolist()
+        desenhar_tabela(pdf, ['Nome', 'Matrícula', 'Semestre'], data)
 
     # Tabela de Classificação Geral
     if not df_sorted.empty:
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(200, 10, 'Classificação Geral', ln=True, align='L')
-        pdf.set_font('Arial', '', 10)
-        for i, row in df_sorted.iterrows():
-            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+        data = df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']].values.tolist()
+        desenhar_tabela(pdf, header, data)
 
     # Gerar PDF e salvar no diretório local
     pdf_output = 'classificacao_candidatos.pdf'
@@ -160,7 +173,7 @@ def exibir_tabela():
             st.write("### Candidatos Suplentes:")
             st.dataframe(suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        st.write("### Candidatos Desqualificados (Nota < 10):")
+               st.write("### Candidatos Desqualificados (Nota < 10):")
         st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
         st.write("### Candidatos Ausentes:")
@@ -200,5 +213,6 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
 
 
