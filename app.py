@@ -46,7 +46,8 @@ def exibir_tabela():
         with col1:
             st.write(row['Nome'])
         with col2:
-            df.at[index, 'Nota'] = st.number_input(f'Nota de {row["Nome"]}', min_value=0, max_value=20, value=row['Nota'], key=f'nota_{index}')
+            # Campo de input sem o botão de mais/menos
+            df.at[index, 'Nota'] = st.text_input(f'Nota de {row["Nome"]}', value=row['Nota'], key=f'nota_{index}')
         with col3:
             df.at[index, 'Ausente'] = st.checkbox('Ausente?', value=row['Ausente'], key=f'ausente_{index}')
 
@@ -55,24 +56,36 @@ def exibir_tabela():
         # Marcar nota zero para candidatos ausentes
         df.loc[df['Ausente'] == True, 'Nota'] = 0
 
+        # Garantir que o valor da nota seja convertido para inteiro
+        df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce').fillna(0).astype(int)
+
         # Classificar candidatos em ordem decrescente de notas e em caso de empate, por semestre decrescente
         df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
 
         # Selecionar os 18 primeiros aprovados
-        aprovados = df_sorted.head(18)
+        aprovados = df_sorted.head(18).reset_index(drop=True)
+        aprovados['Classificação'] = aprovados.index + 1
 
         # Selecionar os 5 próximos como suplentes
-        suplentes = df_sorted.iloc[18:23]
+        suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
+        suplentes['Classificação'] = suplentes.index + 19
 
-        # Exibir os candidatos aprovados e suplentes
-        st.write("### Candidatos Aprovados:")
-        st.dataframe(aprovados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
-
-        st.write("### Candidatos Suplentes:")
-        st.dataframe(suplentes[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        desqualificados = df_sorted[df_sorted['Nota'] < 10]
 
         # Filtrar e exibir candidatos ausentes
         ausentes = df[df['Ausente'] == True]
+
+        # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes
+        st.write("### Candidatos Aprovados:")
+        st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        st.write("### Candidatos Suplentes:")
+        st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
+
+        st.write("### Candidatos Desqualificados (Nota < 10):")
+        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
+
         st.write("### Candidatos Ausentes:")
         st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
 
