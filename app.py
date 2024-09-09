@@ -38,29 +38,30 @@ candidatos = [
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF com as mesmas tabelas exibidas no app, com linhas e colunas e ajustes de largura
+# Função para gerar o PDF com as mesmas tabelas exibidas no app, ajustando largura, fonte e removendo quebra de linha
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
 
-    pdf.set_font('Arial', 'B', 16)
+    # Diminuir o tamanho da fonte
+    pdf.set_font('Arial', 'B', 14)
     pdf.cell(200, 10, 'Classificação de Candidatos', ln=True, align='C')
 
     # Função auxiliar para desenhar uma tabela no PDF
     def desenhar_tabela(pdf, header, data):
-        pdf.set_font('Arial', 'B', 10)
+        pdf.set_font('Arial', 'B', 8)
 
         # Cabeçalhos da tabela (centralizados)
         for col in header:
-            pdf.cell(45 if col == 'Nome' else 35, 10, col, 1, 0, 'C')
+            pdf.cell(70 if col == 'Nome' else 35, 10, col, 1, 0, 'C')
         pdf.ln()
 
-        # Linhas da tabela (centralizadas e com quebra de linha para o nome)
-        pdf.set_font('Arial', '', 10)
+        # Linhas da tabela (centralizadas e sem quebra de linha para o nome)
+        pdf.set_font('Arial', '', 8)
         for row in data:
             for i, item in enumerate(row):
-                if i == 1:  # Nome - largura maior e quebra de linha
-                    pdf.multi_cell(45, 10, str(item), 1, 'C')
+                if i == 1:  # Nome - largura maior, sem quebra de linha
+                    pdf.cell(70, 10, str(item), 1, 0, 'C')
                 else:
                     pdf.cell(35, 10, str(item), 1, 0, 'C')
             pdf.ln()
@@ -166,10 +167,10 @@ def exibir_tabela():
         # Filtrar e exibir candidatos ausentes
         ausentes = df[df['Ausente'] == True]
 
-                # Salvar a classificação no estado
+        # Salvar a classificação no estado
         salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted if not df_classificaveis.empty else pd.DataFrame())
 
-        # Exibir resultados
+                # Exibir resultados
         if not df_classificaveis.empty:
             st.write("### Candidatos Aprovados:")
             st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
