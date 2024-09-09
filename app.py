@@ -38,38 +38,53 @@ candidatos = [
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
-# Função para gerar o PDF
+# Função para gerar o PDF com as mesmas tabelas exibidas no app
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF()
     pdf.add_page()
 
-    pdf.set_font('Arial', 'B', 12)
-    pdf.cell(200, 10, 'Classificação Geral', ln=True, align='C')
+    pdf.set_font('Arial', 'B', 16)
+    pdf.cell(200, 10, 'Classificação de Candidatos', ln=True, align='C')
+
+    # Tabela de Candidatos Aprovados
+    if not aprovados.empty:
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
+        pdf.set_font('Arial', '', 10)
+        for i, row in aprovados.iterrows():
+            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Tabela de Candidatos Suplentes
+    if not suplentes.empty:
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
+        pdf.set_font('Arial', '', 10)
+        for i, row in suplentes.iterrows():
+            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Tabela de Candidatos Desqualificados
+    if not desqualificados.empty:
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
+        pdf.set_font('Arial', '', 10)
+        for i, row in desqualificados.iterrows():
+            pdf.cell(200, 10, f'{row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Tabela de Candidatos Ausentes
+    if not ausentes.empty:
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
+        pdf.set_font('Arial', '', 10)
+        for i, row in ausentes.iterrows():
+            pdf.cell(200, 10, f'{row["Nome"]} - Semestre: {row["Semestre"]}', ln=True)
 
     # Tabela de Classificação Geral
-    pdf.cell(200, 10, 'Classificação Geral de Todos os Candidatos', ln=True, align='L')
-    for i, row in df_sorted.iterrows():
-        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
-
-    # Aprovados
-    pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
-    for i, row in aprovados.iterrows():
-        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
-
-    # Suplentes
-    pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
-    for i, row in suplentes.iterrows():
-        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
-
-    # Desqualificados
-    pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
-    for i, row in desqualificados.iterrows():
-        pdf.cell(200, 10, f'{row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
-
-    # Ausentes
-    pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
-    for i, row in ausentes.iterrows():
-        pdf.cell(200, 10, f'{row["Nome"]} - Semestre: {row["Semestre"]}', ln=True)
+    if not df_sorted.empty:
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(200, 10, 'Classificação Geral', ln=True, align='L')
+        pdf.set_font('Arial', '', 10)
+        for i, row in df_sorted.iterrows():
+            pdf.cell(200, 10, f'{row["Classificacao"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
 
     # Gerar PDF e salvar no diretório local
     pdf_output = 'classificacao_candidatos.pdf'
@@ -114,15 +129,15 @@ def exibir_tabela():
         if not df_classificaveis.empty:
             df_sorted = df_classificaveis.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
             df_sorted = df_sorted.reset_index(drop=True)  # Resetar o índice
-            df_sorted['Classificação'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
+            df_sorted['Classificacao'] = df_sorted.index + 1  # Adicionar a classificação geral começando de 1
 
             # Selecionar os 18 primeiros aprovados
             aprovados = df_sorted.head(18).reset_index(drop=True)
-            aprovados['Classificação'] = aprovados.index + 1
+            aprovados['Classificacao'] = aprovados.index + 1
 
             # Selecionar os 5 próximos como suplentes
             suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
-            suplentes['Classificação'] = suplentes.index + 19
+            suplentes['Classificacao'] = suplentes.index + 19
 
         else:
             aprovados = pd.DataFrame()
@@ -140,10 +155,10 @@ def exibir_tabela():
         # Exibir resultados
         if not df_classificaveis.empty:
             st.write("### Candidatos Aprovados:")
-            st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
+            st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
             st.write("### Candidatos Suplentes:")
-            st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
+            st.dataframe(suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
         st.write("### Candidatos Desqualificados (Nota < 10):")
         st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
@@ -153,7 +168,7 @@ def exibir_tabela():
 
         if not df_classificaveis.empty:
             st.write("### Classificação Geral:")
-            st.dataframe(df_sorted[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
+            st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
     # Botões lado a lado para gerar e baixar PDF
     if 'aprovados' in st.session_state:
@@ -180,10 +195,6 @@ if __name__ == '__main__':
         st.session_state['aprovados'] = pd.DataFrame()
         st.session_state['suplentes'] = pd.DataFrame()
         st.session_state['desqualificados'] = pd.DataFrame()
-        st.session_state['ausentes'] = pd.DataFrame()
-        st.session_state['df_sorted'] = pd.DataFrame()
-        st.session_state['pdf_file'] = None
-
-    exibir_tabela()
+        st
 
 
