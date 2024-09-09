@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from fpdf import FPDF
 
 # Lista completa de 28 candidatos com nome, matrícula, nota, se estão ausentes e semestre
 candidatos = [
@@ -33,6 +34,44 @@ candidatos = [
     {"Nome": "Tiago Mann Wastowski", "Matrícula": "2022020377", "Nota": 0, "Ausente": False, "Semestre": 5}
 ]
 
+# Função para gerar PDF
+def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
+    pdf = FPDF()
+    pdf.add_page()
+
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(200, 10, 'Classificação Geral', ln=True, align='C')
+
+    # Tabela de Classificação Geral
+    pdf.cell(200, 10, 'Classificação Geral de Todos os Candidatos', ln=True, align='L')
+    for i, row in df_sorted.iterrows():
+        pdf.cell(200, 10, f'{i+1}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Aprovados
+    pdf.cell(200, 10, 'Candidatos Aprovados', ln=True, align='L')
+    for i, row in aprovados.iterrows():
+        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Suplentes
+    pdf.cell(200, 10, 'Candidatos Suplentes', ln=True, align='L')
+    for i, row in suplentes.iterrows():
+        pdf.cell(200, 10, f'{row["Classificação"]}. {row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Desqualificados
+    pdf.cell(200, 10, 'Candidatos Desqualificados (Nota < 10)', ln=True, align='L')
+    for i, row in desqualificados.iterrows():
+        pdf.cell(200, 10, f'{row["Nome"]} - Nota: {row["Nota"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Ausentes
+    pdf.cell(200, 10, 'Candidatos Ausentes', ln=True, align='L')
+    for i, row in ausentes.iterrows():
+        pdf.cell(200, 10, f'{row["Nome"]} - Semestre: {row["Semestre"]}', ln=True)
+
+    # Gerar PDF
+    pdf_output = '/mnt/data/classificacao_candidatos.pdf'
+    pdf.output(pdf_output)
+    return pdf_output
+
 # Criar DataFrame
 df = pd.DataFrame(candidatos)
 
@@ -54,41 +93,4 @@ def exibir_tabela():
     # Botão para exibir os dados atualizados
     if st.button('Classificar Candidatos'):
         # Marcar nota zero para candidatos ausentes
-        df.loc[df['Ausente'] == True, 'Nota'] = 0
-
-        # Garantir que o valor da nota seja convertido para inteiro
-        df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce').fillna(0).astype(int)
-
-        # Classificar candidatos em ordem decrescente de notas e em caso de empate, por semestre decrescente
-        df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
-
-        # Selecionar os 18 primeiros aprovados
-        aprovados = df_sorted.head(18).reset_index(drop=True)
-        aprovados['Classificação'] = aprovados.index + 1
-
-        # Selecionar os 5 próximos como suplentes
-        suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
-        suplentes['Classificação'] = suplentes.index + 19
-
-        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
-        desqualificados = df_sorted[df_sorted['Nota'] < 10]
-
-        # Filtrar e exibir candidatos ausentes
-        ausentes = df[df['Ausente'] == True]
-
-        # Exibir os candidatos aprovados, suplentes, desqualificados e ausentes
-        st.write("### Candidatos Aprovados:")
-        st.dataframe(aprovados[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
-
-        st.write("### Candidatos Suplentes:")
-        st.dataframe(suplentes[['Classificação', 'Nome', 'Matrícula', 'Nota', 'Semestre']])
-
-        st.write("### Candidatos Desqualificados (Nota < 10):")
-        st.dataframe(desqualificados[['Nome', 'Matrícula', 'Nota', 'Semestre']])
-
-        st.write("### Candidatos Ausentes:")
-        st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']])
-
-# Executar o aplicativo
-if __name__ == '__main__':
-    exibir_tabela()
+        df.loc[df['Ausente'] == True, 'Nota
