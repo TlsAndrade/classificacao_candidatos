@@ -170,7 +170,7 @@ def exibir_tabela():
             if not suplentes.empty:
                 suplentes['Classificacao'] = suplentes.index + 19
 
-                else:
+            else:
             aprovados = pd.DataFrame()
             suplentes = pd.DataFrame()
 
