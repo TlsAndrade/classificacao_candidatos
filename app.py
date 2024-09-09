@@ -171,9 +171,10 @@ def exibir_tabela():
             st.write("### Classificação Geral:")
             st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
-        # Botões lado a lado para gerar e baixar PDF
-        if 'aprovados' in st.session_state:
+         # Botões lado a lado para gerar e baixar PDF
+    if 'aprovados' in st.session_state:
         col1, col2 = st.columns([1, 1])
+        
         with col1:
             gerar = st.button('Gerar PDF', key="gerar_pdf")
 
@@ -201,4 +202,3 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
-
