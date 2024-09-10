@@ -38,6 +38,19 @@ candidatos = [
 # Criar DataFrame com os dados dos candidatos
 df = pd.DataFrame(candidatos)
 
+# Função para aplicar estilo aos candidatos com a mesma nota
+def destacar_mesma_nota(df):
+    # Inicializar uma série para o estilo
+    style = pd.DataFrame('', index=df.index, columns=df.columns)
+    
+    # Encontrar notas duplicadas
+    duplicated_notes = df['Nota'].duplicated(keep=False)
+    
+    # Aplicar estilo (negrito e vermelho) nas linhas com notas duplicadas
+    style.loc[duplicated_notes, :] = 'font-weight: bold; color: red;'
+    
+    return style
+
 # Função para gerar o PDF ajustado para uma página A4
 def gerar_pdf(aprovados, suplentes, desqualificados, ausentes, df_sorted):
     pdf = FPDF(orientation='P', unit='mm', format='A4')
@@ -156,11 +169,17 @@ def exibir_tabela():
         if not df_sorted.empty:
             df_sorted['Classificacao'] = df_sorted.index + 1
 
+        # Aplicar estilo condicional na tabela de classificação geral
+        styled_df = df_sorted.style.apply(destacar_mesma_nota, axis=None)
+
+        # Exibir a tabela de classificação geral com o estilo
+        st.write("### Classificação Geral de Todos os Candidatos:")
+        st.dataframe(styled_df, use_container_width=True)
         # Filtrar os candidatos aprovados e suplentes (com nota >= 10)
         aprovados = df_sorted[df_sorted['Nota'] >= 10].head(18).reset_index(drop=True)
         suplentes = df_sorted[df_sorted['Nota'] >= 10].iloc[18:23].reset_index(drop=True)
 
-               # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
         desqualificados = df_sorted[df_sorted['Nota'] < 10]
 
         # Filtrar e exibir candidatos ausentes
@@ -170,9 +189,6 @@ def exibir_tabela():
         salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted)
 
         # Exibir resultados
-        st.write("### Classificação Geral de Todos os Candidatos:")
-        st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
-
         if not aprovados.empty:
             st.write("### Candidatos Aprovados:")
             st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
@@ -219,6 +235,8 @@ if __name__ == '__main__':
         st.session_state['pdf_file'] = None
 
     exibir_tabela()
+
+
 
 
 
