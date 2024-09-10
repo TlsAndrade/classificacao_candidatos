@@ -148,46 +148,36 @@ def exibir_tabela():
         # Garantir que o valor da nota seja convertido para inteiro
         df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce').fillna(0).astype(int)
 
-                # Filtrar candidatos com nota >= 10 para serem classificados
-        df_classificaveis = df[df['Nota'] >= 10]
+        # Classificar todos os candidatos, independentemente da nota
+        df_sorted = df.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
+        df_sorted = df_sorted.reset_index(drop=True)
 
-        # Classificar candidatos com nota >= 10 em ordem decrescente de notas e em caso de empate, por semestre
-        if not df_classificaveis.empty:
-            df_sorted = df_classificaveis.sort_values(by=['Nota', 'Semestre'], ascending=[False, False])
-            df_sorted = df_sorted.reset_index(drop=True)
+        # Garantir que o DataFrame `df_sorted` não esteja vazio antes de criar a coluna 'Classificacao'
+        if not df_sorted.empty:
+            df_sorted['Classificacao'] = df_sorted.index + 1
 
-            # Garantir que o DataFrame `aprovados` não esteja vazio antes de criar a coluna 'Classificacao'
-            if not df_sorted.empty:
-                df_sorted['Classificacao'] = df_sorted.index + 1
+        # Filtrar os candidatos aprovados e suplentes (com nota >= 10)
+        aprovados = df_sorted[df_sorted['Nota'] >= 10].head(18).reset_index(drop=True)
+        suplentes = df_sorted[df_sorted['Nota'] >= 10].iloc[18:23].reset_index(drop=True)
 
-            # Selecionar os 18 primeiros aprovados
-            aprovados = df_sorted.head(18).reset_index(drop=True)
-            if not aprovados.empty:
-                aprovados['Classificacao'] = aprovados.index + 1
-
-            # Selecionar os 5 próximos como suplentes
-            suplentes = df_sorted.iloc[18:23].reset_index(drop=True)
-            if not suplentes.empty:
-                suplentes['Classificacao'] = suplentes.index + 19
-        else:
-            aprovados = pd.DataFrame()
-            suplentes = pd.DataFrame()
-
-
-        # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
-        desqualificados = df[df['Nota'] < 10]
+               # Filtrar e exibir candidatos desqualificados (nota abaixo de 10)
+        desqualificados = df_sorted[df_sorted['Nota'] < 10]
 
         # Filtrar e exibir candidatos ausentes
-        ausentes = df[df['Ausente'] == True]
+        ausentes = df_sorted[df_sorted['Ausente'] == True]
 
         # Salvar a classificação no estado
-        salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted if not df_classificaveis.empty else pd.DataFrame())
+        salvar_classificacao(aprovados, suplentes, desqualificados, ausentes, df_sorted)
 
         # Exibir resultados
-        if not df_classificaveis.empty:
+        st.write("### Classificação Geral de Todos os Candidatos:")
+        st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
+
+        if not aprovados.empty:
             st.write("### Candidatos Aprovados:")
             st.dataframe(aprovados[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
+        if not suplentes.empty:
             st.write("### Candidatos Suplentes:")
             st.dataframe(suplentes[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
@@ -198,10 +188,6 @@ def exibir_tabela():
         if not ausentes.empty:
             st.write("### Candidatos Ausentes:")
             st.dataframe(ausentes[['Nome', 'Matrícula', 'Semestre']], use_container_width=True)
-
-        if not df_classificaveis.empty:
-            st.write("### Classificação Geral:")
-            st.dataframe(df_sorted[['Classificacao', 'Nome', 'Matrícula', 'Nota', 'Semestre']], use_container_width=True)
 
     # Botões lado a lado para gerar e baixar PDF
     if 'aprovados' in st.session_state:
