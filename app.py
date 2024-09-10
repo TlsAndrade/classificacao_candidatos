@@ -25,7 +25,7 @@ candidatos = [
     {"Nome": "Lucca Henrique Moura da Silva", "Matrícula": "2022010625", "Nota": '', "Ausente": False, "Semestre": 6},
     {"Nome": "Luiz Otavio Wegher Floss", "Matrícula": "2022020316", "Nota": '', "Ausente": False, "Semestre": 5},
     {"Nome": "Manar Aiman Dib Khaled", "Matrícula": "2024011525", "Nota": '', "Ausente": False, "Semestre": 7},
-    {"Nome": "Matheus Henrique Bergenthal Porto", "Matrícula": "2020010914", "Nota": '', "Ausente": False, "Semestre": 4},
+    {"Nome": "Matheus Henrique Bergenthal Porto", "Matrícula": "2020010914", "Nota": '', "Ausente": False, "Semestre": 9},
     {"Nome": "Nicolás Navarro Stiler", "Matrícula": "2024020360", "Nota": '', "Ausente": False, "Semestre": 4},
     {"Nome": "Pedro Ziegler Dalenogare", "Matrícula": "2023010019", "Nota": '', "Ausente": False, "Semestre": 7},
     {"Nome": "Rafaela Cougo Rios", "Matrícula": "2022020212", "Nota": '', "Ausente": False, "Semestre": 5},
